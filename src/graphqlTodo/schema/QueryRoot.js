@@ -20,8 +20,9 @@ const QueryRootTodo = new GraphQLObjectType({
       type: User,
       args: {
         id: {
-          type: new GraphQLNonNull(GraphQLInt),
+          type: GraphQLInt,
           description: "the user id",
+          defaultValue: 1,
         }
       },
       where: (userTable, args, context) => {

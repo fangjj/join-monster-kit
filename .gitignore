@@ -1,3 +1,13 @@
+# dependencies
 node_modules
+
+# misc
+.DS_Store
 npm-debug.log
+
+#IDE
+.idea/*
+
 knexfile.js
+
+logs

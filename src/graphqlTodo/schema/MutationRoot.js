@@ -28,7 +28,7 @@ import format from 'pg-format';
 const options = {dialect: 'pg'};
 
 const addTodoMutation = mutationWithClientMutationId({
-  name: "addTodoMutation",
+  name: "AddTodo",
   inputFields: {
     title: {
       description: "todo title",
@@ -45,7 +45,7 @@ const addTodoMutation = mutationWithClientMutationId({
       type: TodoEdge,
       resolve: async ({localTodoId}, args, context, resolveInfo) => {
         const todo = await knex('todos').select().where({id: localTodoId}).then(r => r[0]);
-        const allTodoIds = await knex('todos').select('id').then(r => r).map(r => r.id);
+        const allTodoIds = await knex('todos').select('id').where({user_id:1}).orderBy('id', 'desc').then(r => r).map(r => r.id);
         const cursor = offsetToCursor(allTodoIds.indexOf(localTodoId));
         return {
           node: todo,
@@ -79,7 +79,7 @@ const addTodoMutation = mutationWithClientMutationId({
 
 
 const changeTodoStatusMutation = mutationWithClientMutationId({
-  name: 'changeTodoStatusMutation',
+  name: 'ChangeTodoStatus',
   inputFields: {
     id: {
       description: "todo id",
@@ -124,7 +124,7 @@ const changeTodoStatusMutation = mutationWithClientMutationId({
 
 
 const renameTodoMutation = mutationWithClientMutationId({
-  name: 'renameTodoMutation',
+  name: 'RenameTodo',
   inputFields: {
     id: {
       description: "todo id",
@@ -174,7 +174,7 @@ const renameTodoMutation = mutationWithClientMutationId({
 
 
 const removeTodoMutation = mutationWithClientMutationId({
-  name: "removeTodoMutation",
+  name: "RemoveTodo",
   inputFields: {
     id: {
       description: "todo id",
@@ -209,7 +209,7 @@ const removeTodoMutation = mutationWithClientMutationId({
 });
 
 const removeCompletedTodosMutation = mutationWithClientMutationId({
-  name: "removeCompletedTodosMutation",
+  name: "RemoveCompletedTodos",
   inputFields: {},
   outputFields: {
     deletedTodoIds: {
@@ -238,7 +238,7 @@ const removeCompletedTodosMutation = mutationWithClientMutationId({
 });
 
 const markAllTodosMutation = mutationWithClientMutationId({
-  name: "markAllTodosMutation",
+  name: "MarkAllTodos",
   inputFields: {
     completed: {
       description: "todo completed",
