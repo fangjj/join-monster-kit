@@ -45,14 +45,53 @@ const addTodoMutation = mutationWithClientMutationId({
       type: TodoEdge,
       resolve: async ({localTodoId}, args, context, resolveInfo) => {
         const todo = await knex('todos').select().where({id: localTodoId}).then(r => r[0]);
-        const allTodoIds = await knex('todos').select('id').where({user_id:1}).orderBy('id', 'desc').then(r => r).map(r => r.id);
-        const cursor = offsetToCursor(allTodoIds.indexOf(localTodoId));
+        //const allTodoIds = await knex('todos').select('id').where({user_id:1}).orderBy('id', 'desc').then(r => r).map(r => r.id);
+        //const cursor = offsetToCursor(allTodoIds.indexOf(localTodoId));
+        const cursor = offsetToCursor(0);
         return {
           node: todo,
           cursor,
         };
       }
     },
+    viewer: {
+      description: "viewer",
+      type: User,
+      where: (userTable, args, {user_id}) => {
+        return `${userTable}.id = ${user_id}`;
+      },
+      resolve: (parent, args, context, resolveInfo) => {
+        return JoinMonster(resolveInfo, {user_id: 1}, (sql) => dbCall(sql, knex, context), options);
+      }
+    }
+  },
+  mutateAndGetPayload: async (args, context, resolveInfo) => {
+    const {title, text} = args;
+    const localTodoId = await knex('todos').insert({
+      completed: false,
+      title,
+      text,
+      user_id: 1,
+      id: 100 + Math.floor(Math.random()* 100),
+    }).returning('id').then(r => r[0]);
+    return {localTodoId};
+  }
+});
+
+const addTodo2Mutation = mutationWithClientMutationId({
+  name: "AddTodo2",
+  inputFields: {
+    title: {
+      description: "todo title",
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    text: {
+      description: "todo text",
+      type: GraphQLString,
+    },
+  },
+  outputFields: {
+
     viewer: {
       description: "viewer",
       type: User,
@@ -279,6 +318,7 @@ const MutationRoot = new GraphQLObjectType({
   description: "MutationRoot",
   fields: () => ({
     addTodo: addTodoMutation,
+    addTodo2: addTodo2Mutation,
     changeTodoStatus: changeTodoStatusMutation,
     renameTodo: renameTodoMutation,
     removeTodo: removeTodoMutation,
